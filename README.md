@@ -31,8 +31,8 @@ And remember: With great power comes... (we already know).
 -------------------------------------------------------------------------------------------------------------------------------------------
 Level 1 | Basic | Exemple
 ------------------------------------------------|------------------------------------------------|-----------------------------------------
-[0] | TCP or UDP server just to receive messages | :heavy_check_mark:
-[1] | TCP chat server | :heavy_check_mark:
+[0] | TCP or UDP server just to receive messages | :x:
+[1] | TCP chat server | :x:
 [2] | UDP chat server | :x:
 [3] | Multi-threaded UDP or TCP chat server | :x:
 [4] | Server for file transfers | :x:
@@ -45,14 +45,14 @@ Level 1 | Basic | Exemple
 -------------------------------------------------------------------------------------------------------------------------------------------
 Level 2 | Essential | Exemple
 ------------------------------------------------|------------------------------------------------|-----------------------------------------
-[11] | Simple port scanner | :heavy_check_mark:
+[11] | Simple port scanner | :x:
 [12] | Port scanner with OS fingerprint using TTL (Time To Live) | :x:
 [13] | Port scanner with port footprint (HTTP? DNS? FTP? IRC?) | :x:
 [14] | Simple Web Directory brute-forcer (Threaded) | :x:
 [15] | Recursive Web Directory brute-forcer (Threaded peer recursion) | :x:
 [16] | Web Login bruteforce tool | :x:
 [17] | FTP Login bruteforce tool | :x:
-[18] | SSH Login bruteforce tool | :heavy_check_mark:
+[18] | SSH Login bruteforce tool | :x:
 [19] | FTP User footprint | :x:
 [20] | MYSQL User footprint | :x:
 [21] | Simple Google Bot for web scan | :x:
