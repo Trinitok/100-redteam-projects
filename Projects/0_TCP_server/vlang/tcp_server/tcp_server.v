@@ -52,8 +52,9 @@ fn create_listener() ?string {
 	//  once the listener is created, accept will wait for a TCP connection to be made
 	//  it will hang when trying to read sometimes
 	mut tcp_conn := listener.accept()  or { return error('could not accept connection') }
+	tcp_conn.read(mut &buf) or { println('issue when reading: $err') }
+	println(buf)
 	tcp_conn.write_string('thanks') ?
-	get_client_meta(mut tcp_conn) ?
 	tcp_conn.close() ?
 	
 	return 'listener finsihed'
