@@ -2,6 +2,9 @@ module process_http_request_type
 
 import net
 
+//  Processes a TCP HTTP request's headers
+//  the separation between HTTP header and body is the \r\n line with nothing else
+//  So if I trim that line then it will likely show as an empty string
 fn process_request_headers(mut tcp_conn &net.TcpConn) {
 	println('here are the client request headers:')
 	for {
@@ -14,6 +17,9 @@ fn process_request_headers(mut tcp_conn &net.TcpConn) {
 	}
 }
 
+//  Currently this is a recreation of the V TcpConn struct's read_ptr function
+// https://github.com/vlang/v/blob/e32c65c3222baefa64e1c33bffa49d12b80adef9/vlib/net/tcp.v#L87
+//  I have added a bunch of caveman debug lines
 fn read_ptr(mut c &net.TcpConn, buf_ptr &byte, len int) ?int {
 	println('entering read_ptr')
 	println('executing wrap_read_result with handle: $c.sock.handle ptr: $buf_ptr len: $len')
@@ -58,6 +64,8 @@ fn read_ptr(mut c &net.TcpConn, buf_ptr &byte, len int) ?int {
 	return none
 }
 
+//  This is a copy-paste of a couple lines from the V WebSocket struct's socket_read_ptr
+//  https://github.com/vlang/v/blob/1ba839dc3bb527ec73eddac6b7c191f0861b8b3f/vlib/net/websocket/io.v#L31
 fn socket_read_ptr(mut conn &net.TcpConn, buf_ptr &byte, len int) ?int {
 	println('entering socket_read_ptr')
 	lock {
@@ -85,6 +93,9 @@ fn socket_read_ptr(mut conn &net.TcpConn, buf_ptr &byte, len int) ?int {
 }
 
 //  Process the body of a HTTP request
+//  Right now this hangs when trying to read the last and final character
+//  When the TCP HTTP body is sent from the browser
+//  If the request is sent via curl then it is just fine and exits gracefully
 fn process_body(mut conn &net.TcpConn) ?string {
 	if conn.get_blocking() {
 		conn.set_blocking(false) or {return error('Error when nonblocking: $err')}
@@ -132,6 +143,8 @@ pub fn process_post(request_line string, mut conn &net.TcpConn) {
 	process_body(mut conn) or { println(err) }
 }
 
+//  For an unrecognized HTTP header
+//  At this time this is anything that is not a GET or POST
 pub fn process_unknown(request_line string, mut conn &net.TcpConn) {
 	println('unknown request type has been made: $request_line')
 }

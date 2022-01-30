@@ -4,17 +4,8 @@ module main
 //  and use the builtin net library
 // TCP Listener: https://github.com/vlang/v/blob/master/vlib/net/tcp.v#L209
 import net
-import io
 
 import process_http_request_type
-
-const (
-	crlf     = '\r\n'
-	msg_peek = 0x02
-	max_read = 400
-	msg_nosignal = 0x4000
-)
-
 
 //  address includes both port and IP address from client
 fn get_client_address(tcp_conn &net.TcpConn) ? {
@@ -32,41 +23,7 @@ fn get_client_ip(tcp_conn &net.TcpConn) ? {
 	println(ip)
 }
 
-fn get_client_body(mut tcp_conn &net.TcpConn) {
-	
-	println('here is the client request body:')
-	for {
-		mut line := tcp_conn.read_line()
-		line = line.trim_space()
-		if line == '\n'  || line == '' || line.len <= 0 {
-			break
-		}
-		println(line.len)
-		println(line.int())
-	}
-}
-
-//  Process the client request
-//  Try to print out the client headers and body for logging purposes
-fn get_client_body_test(mut tcp_conn &net.TcpConn) ? {
-	mut res := ''
-	mut line := 0
-	mut buf := []byte{}
-	mut r := io.new_buffered_reader( reader: tcp_conn )
-	for {
-		println('entering readline')
-		l := r.read_line() or { break }
-		println('exiting readline')
-		println('$l')
-		end := r.end_of_stream()
-		println('has stream ended? $end')
-		if line != 0 || l == '\n' || r.end_of_stream() {
-			break
-		}
-	}
-	println(res)
-}
-
+//  Try to get the client metadata from the request
 fn get_client_meta(mut tcp_conn &net.TcpConn) ? {
 	line := tcp_conn.read_line()
 	req_type := line[0..5]
@@ -81,47 +38,26 @@ fn get_client_meta(mut tcp_conn &net.TcpConn) ? {
 	}
 	get_client_address(tcp_conn) ?
 	get_client_ip(tcp_conn) ?
-	// get_client_headers(mut tcp_conn)
-	
-	// println('============ start get client body test ===========')
-	// get_client_body_test(mut tcp_conn) ?
-	// println('============ end get client body test ===========')
 }
 
+//  creates a TcpListener in V and listens for a connection
 fn create_listener() ?string {
 	socket_handle := 8080
 	saddr := ':$socket_handle'  // ip format must match protocol.  so .ip is ipv4, .ip6 is ipv6
-	addr := net.addr_from_socket_handle( socket_handle )
-	println('size of address object')
-	println(sizeof(addr))
-	println('here is my addr')
-	println(addr)
-	addr_fam := addr.family()
-	println('here is my addr family')
-	println(addr_fam)
-	// test := C.socket(.ip, net.SocketType.tcp, 0)
-	// println('here is test')
-	// println(test)
+	mut buf := []byte{len: 2048}
+	
+	//  listens for a TCP connection
 	mut listener := net.listen_tcp(.ip, saddr) or { return err }
-	println('here is my listener')
-	println(listener)
 
+	//  once the listener is created, accept will wait for a TCP connection to be made
+	//  it will hang when trying to read sometimes
 	mut tcp_conn := listener.accept()  or { return error('could not accept connection') }
 	tcp_conn.write_string('thanks') ?
 	get_client_meta(mut tcp_conn) ?
 	tcp_conn.close() ?
-	println('here is the tcp conn')
-	println(tcp_conn)
 	
 	return 'listener finsihed'
 }
-
-/*
-fn create_tcp_conn() ?{
-	tcp_conn := net.dial_tcp('127.0.0.1') ?
-	print(tcp_conn)
-}
-*/
 
 fn hard_tcp_server() ?string {
 	create_listener() ?
