@@ -4,6 +4,8 @@ module main
 //  and use the builtin net library
 // TCP Listener: https://github.com/vlang/v/blob/master/vlib/net/tcp.v#L209
 import net
+import io
+import time
 
 import process_http_request_type
 
@@ -45,17 +47,30 @@ fn create_listener() ?string {
 	socket_handle := 8080
 	saddr := ':$socket_handle'  // ip format must match protocol.  so .ip is ipv4, .ip6 is ipv6
 	mut buf := []byte{len: 2048}
+
+	buf_size := 2048
+	mut total_bytes_read := 0
+	mut msg := [2048]byte{}
+	mut buffer := [1]byte{} 
 	
 	//  listens for a TCP connection
-	mut listener := net.listen_tcp(.ip, saddr) or { return err }
+	mut listener := net.listen_tcp(.ip6, saddr) or { return err }
+
 
 	//  once the listener is created, accept will wait for a TCP connection to be made
 	//  it will hang when trying to read sometimes
-	mut tcp_conn := listener.accept()  or { return error('could not accept connection') }
-	tcp_conn.read(mut &buf) or { println('issue when reading: $err') }
-	println(buf)
-	tcp_conn.write_string('thanks') ?
-	tcp_conn.close() ?
+	mut tcp_conn := listener.accept() or {
+			listener.close() or {}
+			panic('Failed to accept connection.\nErr Code: $err.code\nErr Message: $err.msg')
+		}
+	conn.set_read_timeout(1 * time.second)
+	defer {
+		tcp_conn.close() or { panic('Failed to close properly')}
+	}
+	mut reader := io.new_buffered_reader(reader: tcp_conn)
+	rbody := io.read_all(reader: reader) or { []byte{} }
+	println(rbody)
+	println(rbody.len)
 	
 	return 'listener finsihed'
 }
