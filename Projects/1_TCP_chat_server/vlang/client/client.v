@@ -20,25 +20,27 @@ fn start_client() {
 	}
 }
 
-fn receive_message() {
+fn receive_message(mut tcp_conn net.TcpConn) {
 	mut reader := io.new_buffered_reader(reader: tcp_conn)
 	rbody := io.read_all(reader: reader) or { []byte{} }
 	println(rbody.bytestr())
 	println(rbody.len)
 }
 
-fn send_message() {
+fn send_message(mut tcp_conn net.TcpConn) bool {
 	message_to_send := os.input('input a message to send>> ')
 
 	if message_to_send == 'FIN' {
-		return
+		return  true
 	}
 	tcp_conn.write_string(message_to_send) or {
 		panic('error writing message to server.  $err')
 	}
 
-	receive_message()
+	receive_message(mut tcp_conn)
 	tcp_conn.close() or { panic('Failed to close properly')}
+
+	return false
 }
 
 fn keep_talking() {
@@ -50,7 +52,11 @@ fn keep_talking() {
 		// 	tcp_conn.close() or { panic('Failed to close properly')}
 		// }
 
-		send_message()
+		finished := send_message(mut tcp_conn)
+
+		if finished {
+			break
+		}
 	}
 }
 

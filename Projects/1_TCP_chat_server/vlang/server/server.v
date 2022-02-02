@@ -14,18 +14,21 @@ pub fn create_server() ?string {
 
 	//  once the listener is created, accept will wait for a TCP connection to be made
 	//  it will hang when trying to read sometimes
-	mut tcp_conn := listener.accept() or {
+	for {
+		mut tcp_conn := listener.accept() or {
 			listener.close() or {}
 			panic('Failed to accept connection.\nErr Code: $err.code\nErr Message: $err.msg')
 		}
-	addr := tcp_conn.peer_addr() or { panic('issue finding peer addr $err') }
-	// tcp_conn.set_read_timeout(60 * time.second)
-	println('connection received from: $addr')
+		addr := tcp_conn.peer_addr() or { panic('issue finding peer addr $err') }
+		// tcp_conn.set_read_timeout(60 * time.second)
+		println('connection received from: $addr')
 
-	mut reader := io.new_buffered_reader(reader: tcp_conn)
-	rbody := io.read_all(reader: reader) or { []byte{} }
-	println(rbody.bytestr())
-	println(rbody.len)
-	tcp_conn.close() or { panic('Failed to close properly')}
+		mut reader := io.new_buffered_reader(reader: tcp_conn)
+		rbody := io.read_all(reader: reader) or { []byte{} }
+		println('$addr: ' + rbody.bytestr())
+		println(rbody.len)
+		tcp_conn.close() or { panic('Failed to close properly')}
+	}
+	
 	return 'listener finished'
 }
