@@ -37,20 +37,31 @@ fn send_message(mut tcp_conn net.TcpConn) bool {
 		panic('error writing message to server.  $err')
 	}
 
-	receive_message(mut tcp_conn)
-	tcp_conn.close() or { panic('Failed to close properly')}
+	// receive_message(mut tcp_conn)
 
 	return false
 }
 
+fn receive_message_from_server(tcp_conn net.TcpConn) {
+	mut reader := io.new_buffered_reader(reader: tcp_conn)
+
+	rbody := io.read_all(reader: reader) or { []byte{} }
+	
+	println('server: ' + rbody.bytestr())
+	println(rbody.len)
+}
+
 fn keep_talking() {
+
 	for {
 		mut tcp_conn := net.dial_tcp('localhost:8080') or {
 			panic('unable to connect to server.  $err')
 		}
-		// defer {
-		// 	tcp_conn.close() or { panic('Failed to close properly')}
-		// }
+		defer {
+			tcp_conn.close() or { panic('Failed to close properly')}
+		}
+
+		go receive_message(mut tcp_conn)
 
 		finished := send_message(mut tcp_conn)
 

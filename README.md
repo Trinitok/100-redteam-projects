@@ -32,7 +32,7 @@ And remember: With great power comes... (we already know).
 Level 1 | Basic | Exemple
 ------------------------------------------------|------------------------------------------------|-----------------------------------------
 [0] | TCP or UDP server just to receive messages | :heavy_check_mark:
-[1] | TCP chat server | :x:
+[1] | TCP chat server | :heavy_check_mark:
 [2] | UDP chat server | :x:
 [3] | Multi-threaded UDP or TCP chat server | :x:
 [4] | Server for file transfers | :x:
