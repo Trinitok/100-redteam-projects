@@ -2,15 +2,24 @@ module main
 
 import os
 
+/**
+*
+*  My caesar cipher implementation in V lang
+*  As of right now it can only handle basic english alpha chars.  If you input a space or any
+*  kind of special character it will break the program
+*
+*/
+
 fn request_rotation_count() int {
-	for {
-		rot_count := os.input('please input a number between 1-25>> ')
-		
+	mut rot_count := os.input('please input a number between 1-25>> ').int()
+	
+	for {		
 		if rot_count > 0 && rot_count < 26 {
 			break
 		}
 		else {
 			println('invalid rotation count.  please try again')
+			rot_count = os.input('please input a number between 1-25>> ').int()
 		}
 	}
 
@@ -28,53 +37,67 @@ fn validate_user_string_input(rot_string string) bool {
 }
 
 fn request_input_to_rotate() string {
-	for {
-		mut rot_string := os.input('please input a string with only alpha characters>> ')
+	mut rot_string := os.input('please input a string with only alpha characters>> ')
 
+	for {
 		is_valid := validate_user_string_input(rot_string)
 		if !is_valid {
 			println('Please input a string with characters from A-Z or a-z. No special chars or numbers')
+			rot_string = os.input('please input a string with only alpha characters>> ')
 		}
 		else {
-			return rot_string
+			break
 		}
 	}
+
+	return rot_string
 }
 
-fn rotate_upper(mut char_byte) byte {
-	for i := 1; i <= rot_count; i ++ {
-		char_byte = char_byte - 1
+fn rotate_upper(char_byte byte, rot_count int) byte {
+	mut ret_byte := byte(0)
+
+	for i in 0 .. rot_count {
+		ret_byte = char_byte - 1
 		if char_byte < 65 {
-			char_byte = 90
+			ret_byte = 90
 		}
 	}
 
-	return char_byte
+	return ret_byte
 }
 
-fn rotate_lower(mut char_byte) byte {
-	for i := 1; i <= rot_count; i ++ {
-		char_byte = char_byte - 1
-		if char_byte < 97 {
-			char_byte = 122
+fn rotate_lower(char_byte byte, rot_count int) byte {
+	mut ret_byte := char_byte
+
+	for i in 0 .. rot_count {
+		//  continually subtract 1 until the rotation count limit is met
+		ret_byte = ret_byte - 1
+		if char_byte < 97 {  //  if you hit the lowest possible lower alpha, then go back to the top
+			ret_byte = 122
 		}
 	}
 
-	return char_byte
+	return ret_byte
 }
 
 fn rotate(user_input string, rot_count int) {
-	rotated_byte_arr := []byte{ len: user_input.len }
+	mut rotated_byte_arr := []byte{ len: user_input.len }
 	for c in user_input {
 		mut char_byte := byte(c)
+		mut ret := byte(0)
 
-		if char_byte >= 65 && <= 90 {
-			c = rotate_upper(mut char_byte)
+		if char_byte >= 65 && char_byte <= 90 {
+			ret = rotate_upper(char_byte, rot_count)
 		}
 		else{
-			c = rotate_lower(char_byte)
+			ret = rotate_lower(char_byte, rot_count)
 		}
+
+		rotated_byte_arr << ret
 	}
+
+	println('here is the final rotated string')
+	println(rotated_byte_arr.reverse().bytestr())
 }
 
 fn create_caesar_cipher() {
@@ -86,5 +109,8 @@ fn create_caesar_cipher() {
 }
 
 fn main() {
+	test := "t"
+	test_bytes := test.bytes()
+	println(test_bytes)
 	create_caesar_cipher()
 }
